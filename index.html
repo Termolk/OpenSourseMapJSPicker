@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <style>
+        #map { height: 100vh; transition: width 0.3s; }
+        .sidebar { width: 30%; height: 100vh; overflow-y: auto; transition: width 0.3s; }
+        .country-card { margin-bottom: 10px; padding: 10px; display: flex; align-items: center; }
+        .country-image { width: 120px; height: 120px; border-radius: 5px; margin-right: 10px; }
+        .country-title { font-size: 16px; color: black; }
+        .popup-image {
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+  
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="sidebar col-4" id="sidebar">
+                <div class="input-group mb-3 mt-3">
+                    <input class="form-control" id="countrySearch" type="text" placeholder="Поиск землячества...">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="searchButton"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div id="countryList">
+
+                </div>
+            </div>
+            <div class="col p-0" id="mapColumn">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var map = L.map('map').setView([55.7558, 37.6173], 3);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        var points = {
+            "Абхазия": {lat: 43.0015, lng: 41.0234, image: "https://media.istockphoto.com/id/674772432/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%BA%D1%80%D0%B0%D1%81%D0%B8%D0%B2%D1%8B%D0%B9-%D0%B2%D0%B8%D0%B4-%D1%81-%D0%B2%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%B0-%D0%BD%D0%B0-%D0%BF%D0%BE%D0%B1%D0%B5%D1%80%D0%B5%D0%B6%D1%8C%D0%B5-%D1%87%D0%B5%D1%80%D0%BD%D0%BE%D0%B3%D0%BE-%D0%BC%D0%BE%D1%80%D1%8F.jpg?s=612x612&w=0&k=20&c=grTSS5mu5_sUCHf-2BuFXpzv1fq7zRjnVkJVrW2lFjQ="},
+            "Россия": {lat: 55.7558, lng: 37.6173, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS8fcYguWb6J91x-dT75I87FpwKlWQeu33-0_BzUGV6Gg&s"},
+            "Азербайджан": {lat: 40.4093, lng: 49.8671, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-x4_Z4K1QlNdZwW31uri4R-08PCAXmyY9xXxanhMQWQ&s"},
+            "Аргентина": {lat: -34.6037, lng: -58.3816, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-2SBqmwbEhw3x4y_rauqLkpSHrJ_Fs9am-jLZ9WW2gg&s"},
+            "Албания": {lat: 41.3275, lng: 19.8187, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4gKSMnL19BRbWSiWJiWIE4Q1HhCXo0ZwXQm5UNRE1vw&s"}
+        };
+
+        document.getElementById('searchButton').addEventListener('click', function() {
+            var searchValue = document.getElementById('countrySearch').value.toLowerCase();
+            document.querySelectorAll('.country-card').forEach(function(card) {
+                var countryName = card.querySelector('.country-title').textContent.toLowerCase();
+                card.style.display = countryName.includes(searchValue) ? '' : 'none';
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var attributionControl = document.querySelector('.leaflet-control-attribution.leaflet-control');
+            if (attributionControl) {
+                attributionControl.innerHTML = '<a href="https://t.me/git0Termolk" target="_blank">Termolk</a>';
+            }
+        });
+
+        Object.keys(points).forEach(function(country) {
+            var point = points[country];
+            var popupContent = `
+                <div class="popup-content">
+                    <img src="${point.image}" class="popup-image">
+                    <div class="country-name" style="background-color: lightblue; border-radius: 5px; font-size: 18px; font-family: Georgia, 'Times New Roman', Times, serif">${country}</div>
+                </div>
+            `;
+
+            var marker = L.marker([point.lat, point.lng]).addTo(map).bindPopup(popupContent);
+
+            var card = document.createElement('div');
+            card.className = 'country-card';
+            card.innerHTML = `
+                <img src="${point.image}" class="country-image">
+                <div class="country-title">${country}</div>
+            `;
+
+            card.onclick = function() {
+                map.setView([point.lat, point.lng], 6);
+                marker.openPopup();
+            };
+
+            document.getElementById('countryList').appendChild(card);
+        });
+    </script>
+</body>
+</html>
